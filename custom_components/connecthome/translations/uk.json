@@ -18,5 +18,20 @@
     "abort": {
       "already_configured": "Цей контролер Butler вже налаштовано."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Налаштування ConnectHome Butler",
+        "data": {
+          "room_name_in_title": "Додавати назву кімнати до імен сутностей",
+          "poll_enabled": "Оновлення в реальному часі (long-polling)",
+          "poll_interval": "Інтервал опитування (секунд)",
+          "entity_prefix": "Префікс назв сутностей",
+          "force_refresh": "Примусове оновлення після дії",
+          "show_hidden": "Показувати приховані пристрої (дебаг)"
+        }
+      }
+    }
   }
 }

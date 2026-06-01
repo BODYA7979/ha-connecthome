@@ -15,7 +15,15 @@ PLATFORMS = [
 CONF_HOST = "host"
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"
-CONF_VERIFY_SSL = "verify_ssl"
+
+CONF_ROOM_NAME_IN_TITLE = "room_name_in_title"
+CONF_POLL_ENABLED = "poll_enabled"
+CONF_POLL_INTERVAL = "poll_interval"
+CONF_ENTITY_PREFIX = "entity_prefix"
+CONF_FORCE_REFRESH = "force_refresh"
+CONF_SHOW_HIDDEN = "show_hidden"
+
+DEFAULT_POLL_INTERVAL = 30
 
 DEFAULT_PORT = 80
 DISCOVERY_PORT = 17318

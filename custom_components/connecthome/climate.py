@@ -191,6 +191,8 @@ class ConnectHomeClimate(ClimateEntity):
         await self.coordinator.client.call_device_action(
             self._device_id, "setMode", {"mode": butler_mode}
         )
+        if self.coordinator.force_refresh:
+            await self.coordinator.refresh_device(self._device_id)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         if ATTR_TEMPERATURE in kwargs:
@@ -202,6 +204,8 @@ class ConnectHomeClimate(ClimateEntity):
                 "setSetpoint",
                 {"setpoint": temp, "setpointType": butler_mode},
             )
+            if self.coordinator.force_refresh:
+                await self.coordinator.refresh_device(self._device_id)
 
     async def async_added_to_hass(self) -> None:
         self.async_on_remove(

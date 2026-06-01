@@ -18,5 +18,20 @@
     "abort": {
       "already_configured": "This Butler controller is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "ConnectHome Butler Options",
+        "data": {
+          "room_name_in_title": "Add room name to entity titles",
+          "poll_enabled": "Real-time polling (long-polling)",
+          "poll_interval": "Poll interval (seconds)",
+          "entity_prefix": "Entity name prefix",
+          "force_refresh": "Force refresh after action",
+          "show_hidden": "Show hidden devices (debug)"
+        }
+      }
+    }
   }
 }

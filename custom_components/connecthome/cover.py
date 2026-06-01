@@ -127,16 +127,22 @@ class ConnectHomeCover(CoverEntity):
         await self.coordinator.client.call_device_action(
             self._device_id, "startLevelChange", {"direction": "up"}
         )
+        if self.coordinator.force_refresh:
+            await self.coordinator.refresh_device(self._device_id)
 
     async def async_close_cover(self, **kwargs: Any) -> None:
         await self.coordinator.client.call_device_action(
             self._device_id, "startLevelChange", {"direction": "down"}
         )
+        if self.coordinator.force_refresh:
+            await self.coordinator.refresh_device(self._device_id)
 
     async def async_stop_cover(self, **kwargs: Any) -> None:
         await self.coordinator.client.call_device_action(
             self._device_id, "stop"
         )
+        if self.coordinator.force_refresh:
+            await self.coordinator.refresh_device(self._device_id)
 
     async def async_set_cover_position(self, **kwargs: Any) -> None:
         position = kwargs.get("position", 0)
@@ -144,6 +150,8 @@ class ConnectHomeCover(CoverEntity):
         await self.coordinator.client.call_device_action(
             self._device_id, "setLevel", {"level": level}
         )
+        if self.coordinator.force_refresh:
+            await self.coordinator.refresh_device(self._device_id)
 
     async def async_added_to_hass(self) -> None:
         self.async_on_remove(
