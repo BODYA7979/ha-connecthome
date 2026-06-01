@@ -41,13 +41,7 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._poll_task: asyncio.Task | None = None
         self._last_poll_index = 0
 
-        self._read_options()
-
-        update_interval = (
-            None
-            if self._options[CONF_POLL_ENABLED]
-            else timedelta(seconds=self._options[CONF_POLL_INTERVAL])
-        )
+        update_interval = None
         super().__init__(
             hass,
             _LOGGER,
@@ -97,6 +91,13 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.async_set_updated_data(self.data)
 
     async def _async_setup(self) -> None:
+        self._read_options()
+        update_interval = (
+            None
+            if self._options[CONF_POLL_ENABLED]
+            else timedelta(seconds=self._options[CONF_POLL_INTERVAL])
+        )
+        self.update_interval = update_interval
         await self._async_refresh_devices()
         if self._options[CONF_POLL_ENABLED]:
             self._poll_task = self.hass.async_create_background_task(

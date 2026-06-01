@@ -23,6 +23,7 @@
     "step": {
       "init": {
         "title": "ConnectHome Butler Options",
+        "description": "Options apply immediately without restart.\n\n**Show hidden devices**: changing this option reloads all entities. When turning it off, any previously visible hidden entities will be removed automatically. If you see stale unavailable entities, restart the integration.",
         "data": {
           "room_name_in_title": "Add room name to entity titles",
           "poll_enabled": "Real-time polling (long-polling)",
@@ -30,6 +31,14 @@
           "entity_prefix": "Entity name prefix",
           "force_refresh": "Force refresh after action",
           "show_hidden": "Show hidden devices (debug)"
+        },
+        "data_description": {
+          "room_name_in_title": "Appends the Butler room name in parentheses, e.g. \"Switch (Kitchen)\"",
+          "poll_enabled": "Keeps a persistent connection to the Butler controller for instant state updates",
+          "poll_interval": "Used only when real-time polling is disabled",
+          "entity_prefix": "Prepended to all entity names, e.g. setting \"Butler\" results in \"Butler Switch\"",
+          "force_refresh": "After every action (turn on/off, set temperature), immediately fetches the updated device state",
+          "show_hidden": "Reloads all entities. Hidden devices are Z-Wave endpoints normally hidden in Butler UI"
         }
       }
     }

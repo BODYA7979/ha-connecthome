@@ -4,9 +4,14 @@
 [![HA](https://img.shields.io/badge/Home%20Assistant-2024.1+-18BCF2?logo=home-assistant&logoColor=white)](https://www.home-assistant.io/)
 
 <p align="center">
-  <img src="icon.png" alt="ConnectHome" width="200">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://brands.home-assistant.io/_/homeassistant/dark_logo.png">
+    <img src="https://brands.home-assistant.io/_/homeassistant/logo.png" alt="Home Assistant" width="100">
+  </picture>
   &nbsp;&nbsp;&nbsp;
-  <img src="https://brands.home-assistant.io/_/homeassistant/logo.png" alt="Home Assistant" width="100">
+  <span style="display:inline-block;background:#0f172a;padding:10px 16px;border-radius:8px">
+    <img src="icon.png" alt="ConnectHome" width="200">
+  </span>
 </p>
 
 > **Disclaimer**: This is an unofficial community integration made by an enthusiast. It is not affiliated with, endorsed by, or connected to ConnectHome or Home Assistant. Use at your own risk. The author assumes no responsibility for any damage, data loss, or other issues caused by using this integration.
