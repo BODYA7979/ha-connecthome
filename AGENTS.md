@@ -28,8 +28,12 @@ custom_components/connecthome/
 ├── cover.py             # CoverEntity for DevShutter
 ├── climate.py           # ClimateEntity for DevThermostat
 ├── lock.py              # LockEntity for DevDoorLock
+├── brand/
+│   └── icon.png         # HA integration icon (256x256)
 ├── strings.json         # Config flow UI strings
-└── translations/en.json # English translations
+└── translations/
+    ├── en.json          # English translations
+    └── uk.json          # Ukrainian translations
 ```
 
 ## Conventions
