@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ConnectHome Butler",
+        "description": "Connect to your ConnectHome Butler smart home controller.\n\n{discovered}",
+        "data": {
+          "host": "Host (IP address or hostname)",
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the Butler controller. Check the IP address.",
+      "invalid_auth": "Invalid username or password."
+    },
+    "abort": {
+      "already_configured": "This Butler controller is already configured."
+    }
+  }
+}

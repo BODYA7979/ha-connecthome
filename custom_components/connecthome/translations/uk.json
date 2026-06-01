@@ -1,0 +1,22 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "ConnectHome Butler",
+        "description": "Підключення до контролера розумного будинку ConnectHome Butler.\n\n{discovered}",
+        "data": {
+          "host": "Хост (IP-адреса або ім'я хоста)",
+          "username": "Ім'я користувача",
+          "password": "Пароль"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Не вдалося підключитися до контролера Butler. Перевірте IP-адресу.",
+      "invalid_auth": "Неправильне ім'я користувача або пароль."
+    },
+    "abort": {
+      "already_configured": "Цей контролер Butler вже налаштовано."
+    }
+  }
+}

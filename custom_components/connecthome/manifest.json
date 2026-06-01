@@ -1,0 +1,11 @@
+{
+  "domain": "connecthome",
+  "name": "ConnectHome Butler",
+  "codeowners": ["@BODYA7979"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/BODYA7979/ha-connecthome",
+  "iot_class": "local_polling",
+  "requirements": ["aiohttp>=3.8.0"],
+  "version": "0.1.0"
+}
