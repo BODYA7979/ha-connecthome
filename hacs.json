@@ -1,8 +1,5 @@
 {
   "name": "ConnectHome Butler",
   "content_in_root": false,
-  "domains": ["connecthome"],
-  "homeassistant": "2024.1.0",
-  "iot_class": "local_polling",
-  "render_readme": true
+  "homeassistant": "2024.1.0"
 }
