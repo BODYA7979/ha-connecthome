@@ -8,17 +8,18 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
+from homeassistant.helpers import entity_registry as er
 
 from .const import (
     DEVICE_TYPE_THERMOSTAT,
     DOMAIN,
     IFACE_THERMOSTAT_MODE,
-    IFACE_THERMOSTAT_OPERATING_STATE,
     IFACE_THERMOSTAT_SETPOINT,
     PARAM_AVAILABLE_MODES,
     PARAM_CURRENT_MODE,
     PARAM_CURRENT_SETPOINTS,
     PARAM_CURRENT_STATE,
+    PARAM_VALUE,
 )
 
 if TYPE_CHECKING:
@@ -50,8 +51,9 @@ async def async_setup_entry(
     entry: "ButlerConfigEntry",
     async_add_entities: Any,
 ) -> None:
-    coordinator: "ButlerCoordinator" = entry.runtime_data
+    coordinator: ButlerCoordinator = entry.runtime_data
     entities: list[ConnectHomeClimate] = []
+    registry = er.async_get(hass)
 
     for device in coordinator.data.get("devices", []):
         if device.get("type") != DEVICE_TYPE_THERMOSTAT:
@@ -68,7 +70,7 @@ async def async_setup_entry(
         hvac_modes: list[HVACMode] = []
         for mode_name in raw_modes:
             hvac = _BUTLER_MODE_TO_HVAC.get(mode_name)
-            if hvac:
+            if hvac and hvac not in hvac_modes:
                 hvac_modes.append(hvac)
 
         if not hvac_modes:
@@ -78,11 +80,30 @@ async def async_setup_entry(
         if has_setpoint:
             supported_features |= ClimateEntityFeature.TARGET_TEMPERATURE
 
+        if (legacy_id := device.get("_legacy_climate_device_id")) is not None:
+            unique_id = f"{entry.entry_id}_climate_{device['id']}"
+            legacy_entity_id = registry.async_get_entity_id(
+                "climate", DOMAIN, f"{entry.entry_id}_climate_{legacy_id}"
+            )
+            if legacy_entity_id:
+                if registry.async_get_entity_id("climate", DOMAIN, unique_id):
+                    _LOGGER.warning(
+                        "Cannot migrate %s: thermostat %s already has a registry entry",
+                        legacy_entity_id,
+                        device["id"],
+                    )
+                else:
+                    registry.async_update_entity(
+                        legacy_entity_id, new_unique_id=unique_id
+                    )
+
         entities.append(
             ConnectHomeClimate(
                 coordinator=coordinator,
                 device_id=device["id"],
-                name=device.get("_display_name", device.get("name", f"Thermostat {device['id']}")),
+                name=device.get(
+                    "_display_name", device.get("name", f"Thermostat {device['id']}")
+                ),
                 unique_id_suffix=f"climate_{device['id']}",
                 hvac_modes=hvac_modes,
                 supported_features=supported_features,
@@ -152,6 +173,10 @@ class ConnectHomeClimate(ClimateEntity):
         device = self._get_device()
         if device is None:
             return None
+        temperature = device.get("params", {}).get(PARAM_VALUE)
+        if temperature is not None:
+            return temperature
+
         room_id = device.get("room_id")
         if room_id is None:
             return None
@@ -161,7 +186,7 @@ class ConnectHomeClimate(ClimateEntity):
                 if temp_sensor_id:
                     for d in self.coordinator.data.get("devices", []):
                         if d.get("id") == temp_sensor_id:
-                            return d.get("params", {}).get("Value")
+                            return d.get("params", {}).get(PARAM_VALUE)
         return None
 
     @property
@@ -171,9 +196,13 @@ class ConnectHomeClimate(ClimateEntity):
         device = self._get_device()
         if device is None:
             return None
-        setpoints = device.get("params", {}).get(PARAM_CURRENT_SETPOINTS, {})
+        params = device.get("params", {})
+        setpoints = params.get(PARAM_CURRENT_SETPOINTS, {})
         if isinstance(setpoints, dict):
-            return setpoints.get("Heat") or setpoints.get("Cool")
+            for mode in (params.get(PARAM_CURRENT_MODE), "Heat", "Cool"):
+                temperature = setpoints.get(mode)
+                if temperature is not None:
+                    return temperature
         return None
 
     @property

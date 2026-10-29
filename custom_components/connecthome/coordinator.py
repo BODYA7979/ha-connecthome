@@ -15,9 +15,12 @@ from .const import (
     CONF_ROOM_NAME_IN_TITLE,
     CONF_SHOW_HIDDEN,
     DEFAULT_POLL_INTERVAL,
+    DEVICE_TYPE_THERMOSTAT,
     DOMAIN,
     IFACE_MULTICHANNEL_ROOT,
     IFACE_PARENT_DEVICE,
+    IFACE_THERMOSTAT_MODE,
+    IFACE_THERMOSTAT_SETPOINT,
     PLATFORMS,
     POLL_EVENT_DEVICE_CHANGED,
     POLL_EVENT_DEVICE_LIST_CHANGED,
@@ -78,16 +81,18 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             else timedelta(seconds=self._options[CONF_POLL_INTERVAL])
         )
         self.update_interval = update_interval
+        start_polling = self._options[CONF_POLL_ENABLED] and self._poll_task is None
         if not self._options[CONF_POLL_ENABLED]:
             if self._poll_task:
                 self._poll_task.cancel()
                 self._poll_task = None
-        else:
-            if self._poll_task is None:
-                self._poll_task = self.hass.async_create_background_task(
-                    self._poll_loop(), f"{DOMAIN}_poll"
-                )
+        elif start_polling:
+            _, self._last_poll_index = await self.client.get_poll(last=0)
         await self._async_refresh_devices()
+        if start_polling:
+            self._poll_task = self.hass.async_create_background_task(
+                self._poll_loop(), f"{DOMAIN}_poll"
+            )
         self.async_set_updated_data(self.data)
 
     async def _async_setup(self) -> None:
@@ -98,6 +103,10 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             else timedelta(seconds=self._options[CONF_POLL_INTERVAL])
         )
         self.update_interval = update_interval
+        if self._options[CONF_POLL_ENABLED]:
+            # Establish the cursor before taking a fresh snapshot. Replaying
+            # /poll?last=0 can overwrite it with unordered historical changes.
+            _, self._last_poll_index = await self.client.get_poll(last=0)
         await self._async_refresh_devices()
         if self._options[CONF_POLL_ENABLED]:
             self._poll_task = self.hass.async_create_background_task(
@@ -126,10 +135,12 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             _sensors = [d for d in filtered if d.get("type") == "DevBinarySensor"]
             if _sensors:
                 states = ", ".join(
-                    f"id={s['id']} Tripped={s.get('params',{}).get('Tripped')}"
+                    f"id={s['id']} Tripped={s.get('params', {}).get('Tripped')}"
                     for s in _sensors[:8]
                 )
-                _LOGGER.debug("INIT: loaded %d devices, sensors: %s", len(filtered), states)
+                _LOGGER.debug(
+                    "INIT: loaded %d devices, sensors: %s", len(filtered), states
+                )
         except ButlerApiError as err:
             raise UpdateFailed(f"Failed to fetch devices: {err}") from err
 
@@ -150,10 +161,45 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         add_room = self._options[CONF_ROOM_NAME_IN_TITLE]
         prefix = self._options[CONF_ENTITY_PREFIX]
 
+        # Butler operates visible thermostat roots directly. A single hidden
+        # thermostat endpoint must not replace that root with a separate cache.
+        thermostat_roots = {
+            device["id"]: device
+            for device in devices
+            if device.get("type") == DEVICE_TYPE_THERMOSTAT
+            and not device.get("hidden", False)
+            and (
+                IFACE_MULTICHANNEL_ROOT in device.get("interfaces", [])
+                or IFACE_PARENT_DEVICE in device.get("interfaces", [])
+            )
+            and (
+                IFACE_THERMOSTAT_MODE in device.get("interfaces", [])
+                or IFACE_THERMOSTAT_SETPOINT in device.get("interfaces", [])
+            )
+        }
+        replacements = {}
+        for root_id, root in thermostat_roots.items():
+            root.pop("_legacy_climate_device_id", None)
+            children = [
+                device
+                for device in devices
+                if device.get("type") == DEVICE_TYPE_THERMOSTAT
+                and device.get("params", {}).get("parentDeviceId") == root_id
+            ]
+            if len(children) == 1 and children[0].get("hidden", False):
+                child_id = children[0]["id"]
+                replacements[child_id] = root_id
+                root["_legacy_climate_device_id"] = child_id
+
         filtered = []
         for device in devices:
             interfaces = device.get("interfaces", [])
-            if IFACE_MULTICHANNEL_ROOT in interfaces or IFACE_PARENT_DEVICE in interfaces:
+            if (
+                IFACE_MULTICHANNEL_ROOT in interfaces
+                or IFACE_PARENT_DEVICE in interfaces
+            ) and device["id"] not in thermostat_roots:
+                continue
+            if device["id"] in replacements:
                 continue
             if not show_hidden and device.get("hidden", False):
                 continue
@@ -185,7 +231,9 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     self.async_set_updated_data(self.data)
                     break
         except Exception:
-            _LOGGER.debug("Force refresh failed for device %d", device_id, exc_info=True)
+            _LOGGER.debug(
+                "Force refresh failed for device %d", device_id, exc_info=True
+            )
 
     async def _poll_loop(self) -> None:
         _LOGGER.debug("POLL: started, last=%d", self._last_poll_index)
@@ -202,15 +250,21 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                         new_last,
                         [e.get("type") for e in events],
                     )
-                self._last_poll_index = new_last
-                if events:
-                    await self._handle_events(events)
+                cursor_reset = new_last < self._last_poll_index
+                if cursor_reset:
+                    # A restarted Butler has a new event history. Its current
+                    # snapshot is authoritative, rather than those old events.
+                    await self._async_refresh_devices()
+                    self._last_poll_index = new_last
+                    self.async_set_updated_data(self.data)
+                else:
+                    self._last_poll_index = new_last
+                    if events:
+                        await self._handle_events(events)
             except asyncio.CancelledError:
                 raise
             except Exception:
-                _LOGGER.debug(
-                    "POLL: error, will retry in 5s", exc_info=True
-                )
+                _LOGGER.debug("POLL: error, will retry in 5s", exc_info=True)
                 await asyncio.sleep(5)
 
     async def _handle_events(self, events: list[dict[str, Any]]) -> None:
@@ -231,8 +285,13 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                             "params", []
                         )
                         for key in (
-                            "alive", "name", "role", "room_id",
-                            "hidden", "icon", "last_online",
+                            "alive",
+                            "name",
+                            "role",
+                            "room_id",
+                            "hidden",
+                            "icon",
+                            "last_online",
                         ):
                             if key in event:
                                 merged[key] = event[key]
@@ -252,9 +311,7 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             await self._apply_device_changes(device_changes)
             self.async_set_updated_data(self.data)
 
-    async def _apply_device_changes(
-        self, changes: dict[int, dict[str, Any]]
-    ) -> None:
+    async def _apply_device_changes(self, changes: dict[int, dict[str, Any]]) -> None:
         devices = list(self.data.get("devices", []))
         rooms = self.data.get("rooms", [])
         room_by_id = {r["id"]: r for r in rooms}
@@ -301,7 +358,10 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                         new_val = param.get("new_value")
                         _LOGGER.debug(
                             "DEVICE: id=%d param=%s %s→%s",
-                            device_id, pname, old_val, new_val,
+                            device_id,
+                            pname,
+                            old_val,
+                            new_val,
                         )
                         if pname and pname in device.get("params", {}):
                             device["params"][pname] = new_val
@@ -315,7 +375,7 @@ class ButlerCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         _sensors = [d for d in devices if d.get("type") == "DevBinarySensor"]
         if _sensors:
             states = ", ".join(
-                f"id={s['id']} Tripped={s.get('params',{}).get('Tripped')}"
+                f"id={s['id']} Tripped={s.get('params', {}).get('Tripped')}"
                 for s in _sensors
             )
             _LOGGER.debug("AFTER: sensors=%s", states)

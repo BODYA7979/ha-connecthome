@@ -1,5 +1,5 @@
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -25,7 +25,9 @@ _LOGGER = logging.getLogger(__name__)
 _PREFIXES = ("sensor_", "binary_", "switch_", "light_", "cover_", "climate_", "lock_")
 
 
-def _cleanup_orphaned_entities(hass: HomeAssistant, entry: ConfigEntry, valid_device_ids: set[int]) -> None:
+def _cleanup_orphaned_entities(
+    hass: HomeAssistant, entry: ConfigEntry, valid_device_ids: set[int]
+) -> None:
     registry = er.async_get(hass)
     for entity in list(registry.entities.values()):
         if entity.config_entry_id != entry.entry_id:
@@ -48,9 +50,7 @@ async def async_setup(hass: HomeAssistant, config: "ConfigType") -> bool:
     return True
 
 
-async def async_setup_entry(
-    hass: HomeAssistant, entry: "ButlerConfigEntry"
-) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: "ButlerConfigEntry") -> bool:
     client = ButlerApiClient(
         host=entry.data[CONF_HOST],
         username=entry.data[CONF_USERNAME],
@@ -69,7 +69,9 @@ async def async_setup_entry(
 
     entry.runtime_data = coordinator
 
-    async def _on_options_update(hass: HomeAssistant, entry: "ButlerConfigEntry") -> None:
+    async def _on_options_update(
+        hass: HomeAssistant, entry: "ButlerConfigEntry"
+    ) -> None:
         await hass.config_entries.async_reload(entry.entry_id)
 
     entry.async_on_unload(entry.add_update_listener(_on_options_update))
@@ -77,20 +79,22 @@ async def async_setup_entry(
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     valid_ids = {d["id"] for d in coordinator.data.get("devices", [])}
+    # Keep a legacy entry if a registry conflict prevented its migration.
+    valid_ids.update(
+        d["_legacy_climate_device_id"]
+        for d in coordinator.data.get("devices", [])
+        if "_legacy_climate_device_id" in d
+    )
     _cleanup_orphaned_entities(hass, entry, valid_ids)
 
     return True
 
 
-async def async_unload_entry(
-    hass: HomeAssistant, entry: "ButlerConfigEntry"
-) -> bool:
+async def async_unload_entry(hass: HomeAssistant, entry: "ButlerConfigEntry") -> bool:
     coordinator: ButlerCoordinator = entry.runtime_data
     await coordinator.async_shutdown()
 
-    unload_ok = await hass.config_entries.async_unload_platforms(
-        entry, PLATFORMS
-    )
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
         await coordinator.client.close()
@@ -99,7 +103,5 @@ async def async_unload_entry(
     return unload_ok
 
 
-async def async_reload_entry(
-    hass: HomeAssistant, entry: "ButlerConfigEntry"
-) -> None:
+async def async_reload_entry(hass: HomeAssistant, entry: "ButlerConfigEntry") -> None:
     await hass.config_entries.async_reload(entry.entry_id)
