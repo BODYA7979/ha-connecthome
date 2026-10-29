@@ -9,6 +9,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 
 from .api import ButlerApiClient
@@ -21,6 +22,8 @@ if TYPE_CHECKING:
     ButlerConfigEntry = ConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 _PREFIXES = ("sensor_", "binary_", "switch_", "light_", "cover_", "climate_", "lock_")
 
