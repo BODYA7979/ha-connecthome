@@ -1,22 +1,35 @@
-# Home Assistant: Інтеграція ConnectHome Butler
-
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![HA](https://img.shields.io/badge/Home%20Assistant-2024.1+-18BCF2?logo=home-assistant&logoColor=white)](https://www.home-assistant.io/)
-
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://brands.home-assistant.io/_/homeassistant/dark_logo.png">
-    <img src="https://brands.home-assistant.io/_/homeassistant/logo.png" alt="Home Assistant" width="100">
+    <source media="(prefers-color-scheme: dark)" srcset="custom_components/connecthome/brand/dark_logo@2x.png">
+    <source media="(prefers-color-scheme: light)" srcset="custom_components/connecthome/brand/logo@2x.png">
+    <img src="custom_components/connecthome/brand/logo@2x.png" alt="ConnectHome" width="280">
   </picture>
-  &nbsp;&nbsp;&nbsp;
-  <span style="display:inline-block;background:#0f172a;padding:10px 16px;border-radius:8px">
-    <img src="icon.png" alt="ConnectHome" width="200">
-  </span>
 </p>
 
-> **Відмова від відповідальності**: Це неофіційна інтеграція, створена ентузіастом. Вона не пов'язана з компаніями ConnectHome або Home Assistant і не підтримується ними. Використовуйте на власний ризик. Автор не несе відповідальності за будь-які збитки, втрату даних чи інші проблеми, спричинені використанням цієї інтеграції.
+<h1 align="center">ConnectHome Butler</h1>
 
-Кастомна інтеграція для Home Assistant, що підключається до контролера розумного будинку [ConnectHome Butler](https://c-home.ua/).
+<p align="center">
+  Підключіть <a href="https://c-home.ua/">контролер розумного будинку Butler</a> до <a href="https://www.home-assistant.io/">Home Assistant</a>.<br>
+  Локальне керування &nbsp;·&nbsp; Оновлення в реальному часі &nbsp;·&nbsp; Автоматичний пошук
+</p>
+
+<p align="center">
+  <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Custom-orange?style=flat-square" alt="Кастомна інтеграція HACS"></a>
+  <a href="https://www.home-assistant.io/"><img src="https://img.shields.io/badge/Home%20Assistant-2024.1%2B-18BCF2?style=flat-square&amp;logo=home-assistant&amp;logoColor=white" alt="Home Assistant 2024.1 або новіший"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-3d5ba7?style=flat-square" alt="Ліцензія MIT"></a>
+</p>
+
+<p align="center">
+  <a href="README.md">English</a> &nbsp;·&nbsp; <strong>Українська</strong><br>
+  <a href="#встановлення">Встановлення</a> &nbsp;·&nbsp; <a href="#підтримувані-пристрої">Підтримувані пристрої</a> &nbsp;·&nbsp; <a href="https://github.com/BODYA7979/ha-connecthome/issues">Повідомити про проблему</a>
+</p>
+
+<details>
+<summary>Неофіційна інтеграція — відмова від відповідальності</summary>
+
+Це неофіційна інтеграція, створена ентузіастом. Вона не пов'язана з компаніями ConnectHome або Home Assistant і не підтримується ними. Використовуйте на власний ризик. Автор не несе відповідальності за будь-які збитки, втрату даних чи інші проблеми, спричинені використанням цієї інтеграції.
+
+</details>
 
 ## Можливості
 
@@ -72,6 +85,7 @@ git clone https://github.com/BODYA7979/ha-connecthome.git connecthome
 
 - Home Assistant 2024.1.0+
 - Контролер ConnectHome Butler з прошивкою 0.9+
+- Для іконок і логотипів інтеграції в інтерфейсі Home Assistant потрібна версія 2026.3+.
 
 ## Відомі обмеження
 
@@ -91,4 +105,4 @@ logger:
 
 ## Ліцензія
 
-MIT
+[MIT](LICENSE)

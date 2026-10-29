@@ -1,22 +1,35 @@
-# Home Assistant: ConnectHome Butler Integration
-
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![HA](https://img.shields.io/badge/Home%20Assistant-2024.1+-18BCF2?logo=home-assistant&logoColor=white)](https://www.home-assistant.io/)
-
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://brands.home-assistant.io/_/homeassistant/dark_logo.png">
-    <img src="https://brands.home-assistant.io/_/homeassistant/logo.png" alt="Home Assistant" width="100">
+    <source media="(prefers-color-scheme: dark)" srcset="custom_components/connecthome/brand/dark_logo@2x.png">
+    <source media="(prefers-color-scheme: light)" srcset="custom_components/connecthome/brand/logo@2x.png">
+    <img src="custom_components/connecthome/brand/logo@2x.png" alt="ConnectHome" width="280">
   </picture>
-  &nbsp;&nbsp;&nbsp;
-  <span style="display:inline-block;background:#0f172a;padding:10px 16px;border-radius:8px">
-    <img src="icon.png" alt="ConnectHome" width="200">
-  </span>
 </p>
 
-> **Disclaimer**: This is an unofficial community integration made by an enthusiast. It is not affiliated with, endorsed by, or connected to ConnectHome or Home Assistant. Use at your own risk. The author assumes no responsibility for any damage, data loss, or other issues caused by using this integration.
+<h1 align="center">ConnectHome Butler</h1>
 
-Custom integration for Home Assistant that connects to your [ConnectHome Butler](https://c-home.ua/) smart home controller.
+<p align="center">
+  Connect your <a href="https://c-home.ua/">Butler smart home controller</a> to <a href="https://www.home-assistant.io/">Home Assistant</a>.<br>
+  Local control &nbsp;·&nbsp; Live updates &nbsp;·&nbsp; Automatic discovery
+</p>
+
+<p align="center">
+  <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Custom-orange?style=flat-square" alt="HACS custom integration"></a>
+  <a href="https://www.home-assistant.io/"><img src="https://img.shields.io/badge/Home%20Assistant-2024.1%2B-18BCF2?style=flat-square&amp;logo=home-assistant&amp;logoColor=white" alt="Home Assistant 2024.1 or later"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-3d5ba7?style=flat-square" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  <strong>English</strong> &nbsp;·&nbsp; <a href="README_UA.md">Українська</a><br>
+  <a href="#installation">Installation</a> &nbsp;·&nbsp; <a href="#supported-devices">Supported devices</a> &nbsp;·&nbsp; <a href="https://github.com/BODYA7979/ha-connecthome/issues">Report an issue</a>
+</p>
+
+<details>
+<summary>Unofficial community integration — disclaimer</summary>
+
+This is an unofficial community integration made by an enthusiast. It is not affiliated with, endorsed by, or connected to ConnectHome or Home Assistant. Use at your own risk. The author assumes no responsibility for any damage, data loss, or other issues caused by using this integration.
+
+</details>
 
 ## Features
 
@@ -72,6 +85,7 @@ git clone https://github.com/BODYA7979/ha-connecthome.git connecthome
 
 - Home Assistant 2024.1.0+
 - ConnectHome Butler controller with firmware 0.9+
+- Integration icons and logos in the Home Assistant UI require Home Assistant 2026.3+.
 
 ## Known limitations
 
@@ -91,4 +105,4 @@ logger:
 
 ## License
 
-MIT
+[MIT](LICENSE)
